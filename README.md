@@ -1,5 +1,5 @@
 
-<img src="https://github.com/MannMeruliya/mirror_wall/assets/113959975/36a43e0b-775f-41ef-8026-8fb7e6ab70e2"  width="250" height="550">
+<img src="https://github.com/MannMeruliya/mirror_wall/assets/113959975/36a43e0b-775f-41ef-8026-8fb7e6ab70e2"  width="300" height="600">
 
 <img src="https://github.com/MannMeruliya/mirror_wall/assets/113959975/f2df6739-9600-426e-b4e9-9685fe315832"  width="250" height="550">
 
