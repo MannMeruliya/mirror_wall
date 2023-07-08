@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:mirror_wall/global.dart';
-import 'package:mirror_wall/screen/edu.dart';
-import 'package:mirror_wall/screen/webpage.dart';
 
 class homescreen extends StatefulWidget {
   const homescreen({super.key});
@@ -11,77 +12,71 @@ class homescreen extends StatefulWidget {
 }
 
 class _homescreenState extends State<homescreen> {
+  InAppWebViewController? inAppWebViewController;
+  late PullToRefreshController pullToRefreshController;
+
+  List bookmaark = [];
+
+  String pageURL = "${Global.weburl}";
+
+  @override
+  void initState() {
+    super.initState();
+    pullToRefreshController = PullToRefreshController(onRefresh: () async {
+      if (Platform.isAndroid) {
+        await inAppWebViewController!.reload();
+      } else if (Platform.isIOS) {
+        await inAppWebViewController!.loadUrl(
+          urlRequest: URLRequest(
+            url: await inAppWebViewController!.getUrl(),
+          ),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.lightBlueAccent.withOpacity(0.3),
-        title: Text("Mirror Wall",style: TextStyle(color: Colors.white),),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Center(
-            child: Column(
-              children: [
-                GestureDetector(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => webPage()));
+        title: Text("Google"),
+        actions: [
+        IconButton(onPressed: (){
 
-                 setState(() {
-                   Global.weburl = "https://www.google.co.in";
-                 });
-                  },
-                  child: Container(
-                    height: 350,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    child: Text("Google",style: TextStyle(color: Colors.white,fontSize: 50),),
-                    decoration: BoxDecoration(
-                      color: Colors.lightBlueAccent.withOpacity(0.3),
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                GestureDetector(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => edu()));
-                  },
-                  child: Container(
-                    child: Text("Education",style: TextStyle(color: Colors.white,fontSize: 50),),
-
-                    height: 350,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: Colors.lightBlueAccent.withOpacity(0.3),
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                GestureDetector(
-                  child: Container(
-                    height: 350,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: Colors.lightBlueAccent.withOpacity(0.3),
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        }, icon: Icon(Icons.bookmark_border_rounded)),
+          IconButton(
+            onPressed: () async {
+              if (await inAppWebViewController!.canGoBack()) {
+                await inAppWebViewController!.goBack();
+              }
+            },
+            icon: Icon(Icons.arrow_back_ios_new_rounded),
           ),
-        ),
+          IconButton(
+              onPressed: () async {
+                await inAppWebViewController!.loadUrl(
+                    urlRequest:
+                        URLRequest(url: Uri.parse("https://www.google.co.in")));
+              },
+              icon: Icon(Icons.home)),
+          IconButton(
+              onPressed: () async {
+                if (await inAppWebViewController!.canGoForward()) {
+                  await inAppWebViewController!.goForward();
+                }
+              },
+              icon: Icon(Icons.arrow_forward_ios)),
+        ],
+      ),
+      body: InAppWebView(
+        initialUrlRequest: URLRequest(url: Uri.parse("$pageURL")),
+        onWebViewCreated: (controller) {
+          inAppWebViewController = controller;
+        },
+        pullToRefreshController: pullToRefreshController,
+        onLoadStop: (controller, uri) async {
+          await pullToRefreshController.endRefreshing();
+        },
       ),
     );
   }
